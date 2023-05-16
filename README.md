@@ -2,7 +2,7 @@
 
 ### Functionality
 
-* Read message from a local rabbitmq server
+* Read message from a local rabbitmq server (available localy via docker-compose)
 * Write this message into a Kafka topic
 
 ### Configuration
@@ -17,6 +17,8 @@ Run the script ```run.sh```
 
 * ```/start``` start the in memory workers
 * ```/stats``` pull processing stats (librdkafka)
+
+Load sample messages using the ```message_gen.py``` script into the local rabbitmq.
 
 #### Write case
 
