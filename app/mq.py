@@ -24,7 +24,7 @@ class MQClient:
                                       exchange_type='topic')
         self.channel.queue_declare(queue=queue)
         self.channel.queue_bind(exchange='test', queue=queue, routing_key=queue)
-        #self.channel.basic_qos(prefetch_count=1)
+        self.channel.basic_qos(prefetch_count=100)
 
     def send(self, message, queue):
         self.channel.basic_publish(exchange='test', routing_key=queue, body=message)

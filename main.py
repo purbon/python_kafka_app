@@ -4,7 +4,7 @@ from threading import Event
 from flask import Flask
 
 from app.connect import ConnectTask
-from app.kafka import Writer, VoidWriter
+from app.kafka import Writer
 from app.mq import MQClient
 
 app = Flask(__name__)
@@ -36,12 +36,12 @@ def start():
     mq_client.configure(username="rabbitmq", password="rabbitmq")
     mq_client.connect(queue="A")
 
-    ct = ConnectTask(mq_client=mq_client, kafka_client=kafka_writer)
-    tasks.append(ct)
-
-    print(f'Starting a CT {ct} {len(futures)}')
-    futures.append(executor.submit(task, ct))
-    print(f'Starting a CT {ct} {len(futures)}')
+    print(f'Starting tasks: {len(futures)}')
+    for _ in range(1):
+        ct = ConnectTask(mq_client=mq_client, kafka_client=kafka_writer, config=app.config)
+        tasks.append(ct)
+        futures.append(executor.submit(task, ct))
+    print(f'Starting tasks: {len(futures)}')
 
     return f'{len(futures)} tasks running in the background'
 
@@ -52,6 +52,17 @@ def status():
     for i, feature in enumerate(futures):
         tasks.append(f'Feature {i} running?={feature.running()}')
     return "\n".join(tasks)
+
+
+@app.route('/stats.json')
+def stats():
+    json_str = kafka_writer.json_stats
+    response_str = "{}" if json_str is None else json_str
+    return app.response_class(
+        response=response_str,
+        status=200,
+        mimetype="application/json"
+    )
 
 
 @app.route('/stop')

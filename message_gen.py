@@ -1,3 +1,5 @@
+import json
+
 import pika
 import lorem
 
@@ -27,15 +29,26 @@ class MQClient:
         self.channel.close()
 
 
+from json import dumps
+from faker import Faker
+
+
+def fake_person_generator(n, fake):
+    for x in range(n):
+        yield {'last_name': fake.last_name(),
+               'first_name': fake.first_name(),
+               'street_address': fake.street_address(),
+               'email': fake.email(),
+               'index': x}
+
+
 if __name__ == "__main__":
     client = MQClient()
     client.configure("rabbitmq", "rabbitmq")
     client.connect()
 
-    for i in range(1_000):
-        #message = " ".join(lorem.paragraph() for _ in range(100))
-        message = f'Message#{i}'
-        client.send(message=message)
+    fake = Faker()
+    for message in fake_person_generator(10_000, fake):
+        client.send(message=json.dumps(message))
 
     client.close()
-
